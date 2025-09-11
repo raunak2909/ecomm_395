@@ -26,4 +26,18 @@ class UserRepository {
   }
 
   ///login user
+  Future<dynamic> loginUser({required String email, required String password}) async {
+
+    try{
+
+      return await apiHelper.postApi(url: AppUrls.loginUrl, mBodyParams: {
+        "email":email,
+        "password":password
+      });
+
+    } catch(e){
+      rethrow;
+    }
+
+  }
 }

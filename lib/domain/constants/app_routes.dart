@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../ui/pages/dashboard/dashboard_page.dart';
 import '../../ui/pages/login/login_page.dart';
 import '../../ui/pages/sign_up/register_page.dart';
 import '../../ui/pages/splash/splash_page.dart';
@@ -16,7 +17,7 @@ class AppRoutes{
     splash_page: (context) => const SplashPage(),
     login_page: (context) => const LoginPage(),
     sign_up_page: (context) => const SignUpPage(),
-    //dashboard_page: (context) => const DashboardPage(),
+    dashboard_page: (context) => const DashboardPage(),
   };
 
 }

@@ -1,9 +1,13 @@
 
 
+import 'package:ecomm_395/ui/bloc/user/user_event.dart';
+import 'package:ecomm_395/ui/bloc/user/user_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/constants/app_routes.dart';
+import '../../bloc/user/user_bloc.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
 
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+  bool isLogin = true;
 
 
   @override
@@ -156,27 +162,71 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(
                     width: 350,
                     height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if(formKey.currentState!.validate()){
-
-                        }
+                    child: BlocConsumer<UserBloc, UserState>(
+                      listenWhen: (cs, ps){
+                        return isLogin;
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Log In',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      buildWhen: (cs, ps){
+                        return isLogin;
+                      },
+                      listener: (_ ,state){
+
+                        if(state is UserLoadingState){
+                          isLoading = true;
+                        }
+
+                        if(state is UserFailureState){
+                          isLoading = false;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(state.errorMsg), backgroundColor: Colors.red,)
+                          );
+                        }
+
+                        if(state is UserSuccessState){
+                          isLoading = false;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Login Success"), backgroundColor: Colors.green,)
+                          );
+                          Navigator.pushReplacementNamed(context, AppRoutes.dashboard_page);
+                        }
+
+                      },
+                      builder: (context, state) {
+                        return ElevatedButton(
+                          onPressed: () {
+                            if(formKey.currentState!.validate()){
+                              isLogin = true;
+                              context.read<UserBloc>().add(LoginUserEvent(email: emailController.text, password: passwordController.text));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isLoading ? Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white
+                                ),
+                              ),
+                              SizedBox(),
+                              Text('Logging-in...')
+                            ],
+                          ) : Text(
+                            'Log In',
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }
                     ),
                   ),
 
@@ -235,6 +285,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       TextButton(
                         onPressed: () {
+                          isLogin = false;
                           Navigator.pushNamed(context, AppRoutes.sign_up_page);
                         },
                         child: Text(
