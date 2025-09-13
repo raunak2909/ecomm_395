@@ -1,6 +1,8 @@
 import 'package:ecomm_395/data/remote/helper/api_helper.dart';
+import 'package:ecomm_395/data/remote/repository/product_repo.dart';
 import 'package:ecomm_395/data/remote/repository/user_repo.dart';
 import 'package:ecomm_395/domain/constants/app_routes.dart';
+import 'package:ecomm_395/ui/bloc/product/product_bloc.dart';
 import 'package:ecomm_395/ui/bloc/user/user_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,9 +13,11 @@ void main() {
       providers: [
         BlocProvider(
           create: (context) =>
-              UserBloc(
-                  userRepository: UserRepository(
-                      apiHelper: ApiHelper())),
+              UserBloc(userRepository: UserRepository(apiHelper: ApiHelper())),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ProductBloc(productRepo: ProductRepo(apiHelper: ApiHelper())),
         ),
       ],
       child: const MyApp(),

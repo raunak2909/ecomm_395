@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_exception.dart';
 
 class ApiHelper {
   ///get
-  Future<dynamic> getApi({required String url}) async {
+  Future<dynamic> getApi({required String url, Map<String, String>? mHeaderParams,}) async {
     try {
       var response = await http.get(Uri.parse(url));
       return returnResponse(response);
@@ -22,11 +23,23 @@ class ApiHelper {
   Future<dynamic> postApi({
     required String url,
     Map<String, dynamic>? mBodyParams,
+    Map<String, String>? mHeaderParams,
+    bool isAuth = false,
   }) async {
+
+    if(!isAuth){
+      mHeaderParams ??= {};
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString("token") ?? "";
+      mHeaderParams["Authorization"] = "Bearer $token";
+    }
+
     try {
       var response = await http.post(
         Uri.parse(url),
         body: mBodyParams != null ? jsonEncode(mBodyParams) : null,
+        headers: mHeaderParams,
       );
       return returnResponse(response);
     } on SocketException catch (e) {

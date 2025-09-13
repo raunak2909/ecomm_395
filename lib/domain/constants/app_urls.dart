@@ -6,4 +6,6 @@ class AppUrls{
   static const String registrationUrl = "${baseUrl}user/registration";
   static const String loginUrl = "${baseUrl}user/login";
 
+  static const String fetchProductUrl = "${baseUrl}products";
+
 }

@@ -35,14 +35,12 @@ class _ProductCardState extends State<ProductCard> {
         children: [
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 11),
+            padding: EdgeInsets.symmetric(horizontal: 11, vertical: 11),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: Image.asset("assets/icons/ic_logo.png", width: 150, height: 150,)),
-                SizedBox(
-                  height: 11,
-                ),
+                Center(child: Image.network(widget.imgPath, width: 120, height: 120,)),
+                Spacer(),
                 Text(widget.name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
                 Row(
                   children: [

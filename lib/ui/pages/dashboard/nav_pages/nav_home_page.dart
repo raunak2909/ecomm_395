@@ -1,5 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ecomm_395/ui/bloc/product/product_bloc.dart';
+import 'package:ecomm_395/ui/bloc/product/product_event.dart';
+import 'package:ecomm_395/ui/bloc/product/product_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../custom_widgets/product_card.dart';
 
@@ -11,6 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int selectedIndex = 0;
+
   final List<String> bannerImages = [
     "https://mir-s3-cdn-cf.behance.net/project_modules/fs/3ce709113389695.60269c221352f.jpg",
     "https://picsum.photos/id/1016/800/400",
@@ -60,6 +67,12 @@ class _HomePageState extends State<HomePage> {
       "productPrice": "\$120.00",
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductBloc>().add(FetchProductEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,26 +162,70 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CarouselSlider.builder(
-                      itemCount: bannerImages.length,
-                      itemBuilder: (_, index, __) {
-                        return Container(
-                          margin: EdgeInsets.symmetric(horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: NetworkImage(bannerImages[index]),
-                              fit: BoxFit.cover,
+                    SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: Stack(
+                        children: [
+                          CarouselSlider.builder(
+                            itemCount: bannerImages.length,
+                            itemBuilder: (_, index, __) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  image: DecorationImage(
+                                    image: NetworkImage(bannerImages[index]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            },
+                            options: CarouselOptions(
+                              onPageChanged: (index, _) {
+                                selectedIndex = index;
+                                setState(() {});
+                              },
+                              autoPlay: true,
+                              viewportFraction: 1,
+                              height: 200,
+                              autoPlayCurve: Curves.fastOutSlowIn,
+                              autoPlayInterval: Duration(seconds: 4),
                             ),
                           ),
-                        );
-                      },
-                      options: CarouselOptions(
-                        autoPlay: true,
-                        viewportFraction: 1,
-                        height: 200,
-                        autoPlayCurve: Curves.fastOutSlowIn,
-                        autoPlayInterval: Duration(seconds: 4),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
+                              height: 40,
+                              child: DotsIndicator(
+                                dotsCount: bannerImages.length,
+                                position: selectedIndex.toDouble(),
+                                animate: true,
+                                decorator: DotsDecorator(
+                                  activeSize: Size(18, 8),
+                                  size: Size(8, 8),
+                                  activeShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  color: Colors.transparent,
+                                  activeColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(11),
+                                    side: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  spacing: EdgeInsets.only(
+                                    right: 3,
+                                    top: 11,
+                                    bottom: 11,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 20),
@@ -214,54 +271,72 @@ class _HomePageState extends State<HomePage> {
                         Container(
                           margin: EdgeInsets.only(top: 10, bottom: 150),
                           width: double.infinity,
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            physics: NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 200,
-                                  mainAxisSpacing: 11,
-                                  crossAxisSpacing: 11,
-                                  childAspectRatio: 8 / 9,
-                                ),
-                            itemCount: productData.length,
-                            itemBuilder: (_, index) {
-                              return ProductCard(
-                                imgPath: productData[index]["productImgUrl"],
-                                name: productData[index]["productText"],
-                                price: productData[index]["productPrice"],
-                              );
-                              /*return Container(
-                                      width: 500,
-                                      child: Stack(
-                                        alignment: Alignment.bottomCenter,
-                                        children: [
-                                          Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: BoxDecoration(
-                                              */ /*color: Colors.blueGrey*/ /*
-                                              image: DecorationImage(
-                                                image: NetworkImage(
-                                                  productData[index]['productImgUrl']
+                          child: BlocBuilder<ProductBloc, ProductState>(
+                            builder: (context, state) {
+
+                              if(state is ProductLoadingState){
+                                return Center(child: CircularProgressIndicator(color: Colors.orange,),);
+                              }
+
+                              if(state is ProductErrorState){
+                                return Center(child: Text(state.errorMsg),);
+                              }
+
+                              if(state is ProductLoadedState){
+                                return GridView.builder(
+                                  shrinkWrap: true,
+                                  padding: EdgeInsets.zero,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                  SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 200,
+                                    mainAxisSpacing: 11,
+                                    crossAxisSpacing: 11,
+                                    childAspectRatio: 8 / 9,
+                                  ),
+                                  itemCount: state.mProductList.length,
+                                  itemBuilder: (_, index) {
+                                    return ProductCard(
+                                      imgPath: state.mProductList[index].image!,
+                                      name: state.mProductList[index].name!,
+                                      price: state.mProductList[index].price!,
+                                    );
+                                    /*return Container(
+                                          width: 500,
+                                          child: Stack(
+                                            alignment: Alignment.bottomCenter,
+                                            children: [
+                                              Container(
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  */ /*color: Colors.blueGrey*/ /*
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                      productData[index]['productImgUrl']
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
-                                                fit: BoxFit.cover,
                                               ),
-                                            ),
+                                              Text(
+                                                productData[index]
+                                                ['productText'],
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            productData[index]
-                                            ['productText'],
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );*/
-                            },
+                                        );*/
+                                  },
+                                );
+                              }
+
+                              return Container();
+
+                            }
                           ),
                         ),
                       ],
