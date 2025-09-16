@@ -22,6 +22,7 @@ class _SplashPageState extends State<SplashPage> {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String token = prefs.getString("token") ?? "";
+      print("Token : $token");
 
       if(token.isNotEmpty){
         nextPage = AppRoutes.dashboard_page;

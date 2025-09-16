@@ -1,3 +1,4 @@
+import 'package:ecomm_395/ui/pages/cart/cart_page.dart';
 import 'package:flutter/material.dart';
 
 import 'nav_pages/nav_home_page.dart';
@@ -66,8 +67,9 @@ class _DashboardPageState extends State<DashboardPage> {
             SizedBox(width: 50),
             IconButton(
               onPressed: () {
-                selectedIndex = 3;
-                setState(() {});
+                Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage()));
+                /*selectedIndex = 3;
+                setState(() {});*/
               },
               icon: Icon(
                 Icons.shopping_cart_outlined,

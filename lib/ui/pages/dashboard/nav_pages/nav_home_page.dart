@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ecomm_395/domain/constants/app_routes.dart';
 import 'package:ecomm_395/ui/bloc/product/product_bloc.dart';
 import 'package:ecomm_395/ui/bloc/product/product_event.dart';
 import 'package:ecomm_395/ui/bloc/product/product_state.dart';
+import 'package:ecomm_395/ui/pages/product/detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -273,30 +275,46 @@ class _HomePageState extends State<HomePage> {
                           width: double.infinity,
                           child: BlocBuilder<ProductBloc, ProductState>(
                             builder: (context, state) {
-
-                              if(state is ProductLoadingState){
-                                return Center(child: CircularProgressIndicator(color: Colors.orange,),);
+                              if (state is ProductLoadingState) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.orange,
+                                  ),
+                                );
                               }
 
-                              if(state is ProductErrorState){
-                                return Center(child: Text(state.errorMsg),);
+                              if (state is ProductErrorState) {
+                                return Center(child: Text(state.errorMsg));
                               }
 
-                              if(state is ProductLoadedState){
+                              if (state is ProductLoadedState) {
                                 return GridView.builder(
                                   shrinkWrap: true,
                                   padding: EdgeInsets.zero,
                                   physics: NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                  SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 200,
-                                    mainAxisSpacing: 11,
-                                    crossAxisSpacing: 11,
-                                    childAspectRatio: 8 / 9,
-                                  ),
+                                      SliverGridDelegateWithMaxCrossAxisExtent(
+                                        maxCrossAxisExtent: 200,
+                                        mainAxisSpacing: 11,
+                                        crossAxisSpacing: 11,
+                                        childAspectRatio: 8 / 9,
+                                      ),
                                   itemCount: state.mProductList.length,
                                   itemBuilder: (_, index) {
                                     return ProductCard(
+                                      onPress: () {
+                                        // Handle product card tap
+                                        //Navigator.pushNamed(context, AppRoutes.detail_page, arguments: state.mProductList[index]);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailPage(
+                                              currentProduct:
+                                                  state.mProductList[index],
+                                            ),
+                                          ),
+                                        );
+                                      },
                                       imgPath: state.mProductList[index].image!,
                                       name: state.mProductList[index].name!,
                                       price: state.mProductList[index].price!,
@@ -335,8 +353,7 @@ class _HomePageState extends State<HomePage> {
                               }
 
                               return Container();
-
-                            }
+                            },
                           ),
                         ),
                       ],
