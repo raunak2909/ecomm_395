@@ -8,9 +8,19 @@ import 'app_exception.dart';
 
 class ApiHelper {
   ///get
-  Future<dynamic> getApi({required String url, Map<String, String>? mHeaderParams,}) async {
+  Future<dynamic> getApi({
+    required String url,
+    Map<String, String>? mHeaderParams,
+  }) async {
+
+      mHeaderParams ??= {};
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString("token") ?? "";
+      mHeaderParams["Authorization"] = "Bearer $token";
+
     try {
-      var response = await http.get(Uri.parse(url));
+      var response = await http.get(Uri.parse(url), headers: mHeaderParams);
       return returnResponse(response);
     } on SocketException catch (e) {
       throw NoInternetException(msg: "Not connected to Internet");
